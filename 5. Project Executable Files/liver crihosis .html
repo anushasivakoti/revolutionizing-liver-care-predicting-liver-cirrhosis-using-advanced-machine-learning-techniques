@@ -1,0 +1,232 @@
+`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Liver Cirrhosis Predictor v2</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #fdfbfb, #ebedee);
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #4a148c;
+      color: white;
+      text-align: center;
+      padding: 30px 20px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2.2rem;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .card {
+      background-color: white;
+      padding: 25px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      color: #6a1b9a;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+    }
+
+    input, select {
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      width: 100%;
+    }
+
+    .actions {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button {
+      flex: 1;
+      padding: 12px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .predict {
+      background-color: #6a1b9a;
+      color: white;
+    }
+
+    .predict:hover {
+      background-color: #58117d;
+    }
+
+    .reset {
+      background-color: #e0e0e0;
+      color: #444;
+    }
+
+    .result-box {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .low {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+      border: 2px solid #81c784;
+    }
+
+    .high {
+      background-color: #ffebee;
+      color: #c62828;
+      border: 2px solid #ef5350;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #777;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Liver Cirrhosis Risk Predictor</h1>
+    <p>Advanced Screening Using Health Indicators</p>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <h2>Patient Information</h2>
+      <div class="grid">
+        <input type="number" id="age" placeholder="Age (years)" />
+        <select id="gender">
+          <option value="">Select Gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+        <input type="number" id="alcohol_years" placeholder="Alcohol Use (years)" />
+        <input type="number" id="alcohol_qty" placeholder="Alcohol (quarters/day)" />
+        <select id="hepb">
+          <option value="">Hepatitis B Infection</option>
+          <option value="yes">Positive</option>
+          <option value="no">Negative</option>
+        </select>
+        <select id="hepc">
+          <option value="">Hepatitis C Infection</option>
+          <option value="yes">Positive</option>
+          <option value="no">Negative</option>
+        </select>
+        <select id="diabetes">
+          <option value="">Diabetes</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+        <input type="number" id="bilirubin" placeholder="Total Bilirubin (mg/dl)" />
+        <input type="number" id="albumin" placeholder="Albumin (g/dl)" />
+        <input type="number" id="ag_ratio" placeholder="A/G Ratio" />
+        <input type="number" id="alp" placeholder="ALP (U/L)" />
+        <input type="number" id="sgot" placeholder="SGOT/AST (U/L)" />
+        <input type="number" id="sgpt" placeholder="SGPT/ALT (U/L)" />
+      </div>
+
+      <div class="actions">
+        <button class="predict" onclick="predict()">Predict Risk</button>
+        <button class="reset" onclick="resetForm()">Reset</button>
+      </div>
+
+      <div id="result" class="result-box" style="display: none;"></div>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2025 LiverCare AI Tool. All rights reserved.
+  </footer>
+
+  <script>
+    function predict() {
+  const inputs = [
+    'age', 'alcohol_years', 'alcohol_qty', 'bilirubin',
+    'albumin', 'ag_ratio', 'alp', 'sgot', 'sgpt'
+  ];
+
+  const resultBox = document.getElementById('result');
+  resultBox.style.display = 'block';
+
+  for (let id of inputs) {
+    const val = document.getElementById(id).value;
+    if (val === '' || isNaN(val)) {
+      resultBox.textContent = '❗ Please fill all numeric fields correctly.';
+      resultBox.className = 'result-box high';
+      return;
+    }
+  }
+
+  // Read values
+  const age = parseFloat(document.getElementById('age').value);
+  const alcoholYears = parseFloat(document.getElementById('alcohol_years').value);
+  const alcoholQty = parseFloat(document.getElementById('alcohol_qty').value);
+  const bilirubin = parseFloat(document.getElementById('bilirubin').value);
+  const albumin = parseFloat(document.getElementById('albumin').value);
+  const agRatio = parseFloat(document.getElementById('ag_ratio').value);
+  const alp = parseFloat(document.getElementById('alp').value);
+  const sgot = parseFloat(document.getElementById('sgot').value);
+  const sgpt = parseFloat(document.getElementById('sgpt').value);
+
+  // Flags based on normal range thresholds
+  let riskFlags = 0;
+  if (bilirubin > 1.2) riskFlags++;
+  if (albumin < 3.5) riskFlags++;
+  if (agRatio < 1.0) riskFlags++;
+  if (alp > 120) riskFlags++;
+  if (sgot > 40) riskFlags++;
+  if (sgpt > 40) riskFlags++;
+  if (alcoholYears > 5) riskFlags++;
+  if (alcoholQty > 2) riskFlags++;
+
+  if (riskFlags >= 3) {
+    resultBox.textContent = '⚠️ High Risk of Liver Cirrhosis. Please consult a doctor.';
+    resultBox.className = 'result-box high';
+  } else {
+    resultBox.textContent = '✅ Low Risk. Keep monitoring your health and stay safe!';
+    resultBox.className = 'result-box low';
+  }
+}
+
+
+    function resetForm() {
+      document.querySelectorAll('input, select').forEach(el => el.value = '');
+      const resultBox = document.getElementById('result');
+      resultBox.style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>
